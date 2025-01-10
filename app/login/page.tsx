@@ -1,46 +1,71 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/router'
 
-export default function Login() {
-  const [email, setEmail] = useState('')
+const LoginPage = () => {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically handle the login logic
-    console.log('Login attempt with:', email, password)
-    // For now, we'll just redirect to the dashboard
-    router.push('/dashboard')
+    setError('')
+    setSuccess('')
+
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      setError(errorData.error || 'Login failed')
+    } else {
+      const userData = await response.json()
+      setSuccess('Login successful!') // Handle successful login (e.g., redirect or store user data)
+      console.log('User data:', userData)
+      router.push('/dashboard')
+    }
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-4xl font-bold mb-8">Login</h1>
-      <form onSubmit={handleSubmit} className="w-full max-w-xs">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-          className="w-full px-3 py-2 mb-4 text-gray-700 border rounded"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-          className="w-full px-3 py-2 mb-4 text-gray-700 border rounded"
-        />
-        <button type="submit" className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Login
-        </button>
+    <div>
+      <h1>Login</h1>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
       </form>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {success && <p style={{ color: 'green' }}>{success}</p>}
     </div>
   )
 }
+
+export default LoginPage
 
