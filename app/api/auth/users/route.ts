@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -13,8 +14,9 @@ export async function GET() {
       },
     })
 
-    return new Response(JSON.stringify(users), { status: 200 })
+    return NextResponse.json(users, { status: 200 })
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Error fetching users' }), { status: 500 })
+    console.error(error); // Log the error for debugging
+    return NextResponse.json({ error: 'Error fetching users' }, { status: 500 })
   }
 } 
